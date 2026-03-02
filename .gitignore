@@ -1,0 +1,9 @@
+
+cat >> .gitignore << 'EOF'
+target/
+*.class
+*.jar
+*.iml
+.DS_Store
+.idea/
+rewrite-history.sh
