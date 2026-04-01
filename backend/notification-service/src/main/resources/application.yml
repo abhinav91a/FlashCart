@@ -1,0 +1,10 @@
+server:
+  port: 8084
+
+kafka:
+  bootstrap-servers: localhost:9092
+
+spring:
+  websocket:
+    message-broker:
+      enabled: true
