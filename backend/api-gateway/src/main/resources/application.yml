@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+
+        - id: product-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/products/**
+
+        - id: order-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/orders/**
+
+        - id: inventory-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/inventory/**
+
+        - id: notification-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/notifications/**
+
+      default-filters:
+        - AddResponseHeader=X-Gateway, FlashCart-Gateway
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
