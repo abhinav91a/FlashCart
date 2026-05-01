@@ -254,6 +254,7 @@ Sample request body:
 mvn clean install -DskipTests
 
 # Start the full stack (Postgres, Redis, Zookeeper, Kafka, all services)
+cd infra
 docker compose up --build
 ```
 
