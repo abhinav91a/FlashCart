@@ -5,26 +5,34 @@ spring:
   cloud:
     gateway:
       routes:
-
         - id: product-service
-          uri: http://localhost:8081
+          uri: http://flashcart-product-service:8081
           predicates:
-            - Path=/products/**
+            - Path=/products,/products/**
+          filters:
+            - RewritePath=/products/(?<segment>.*), /api/products/${segment}
+            - RewritePath=/products, /api/products
 
         - id: order-service
-          uri: http://localhost:8082
+          uri: http://flashcart-order-service:8082
           predicates:
             - Path=/orders/**
+          filters:
+            - RewritePath=/orders/(?<segment>.*), /api/orders/${segment}
 
         - id: inventory-service
-          uri: http://localhost:8083
+          uri: http://flashcart-inventory-service:8083
           predicates:
             - Path=/inventory/**
+          filters:
+            - RewritePath=/inventory/(?<segment>.*), /api/inventory/${segment}
 
         - id: notification-service
-          uri: http://localhost:8084
+          uri: http://flashcart-notification-service:8084
           predicates:
             - Path=/notifications/**
+          filters:
+            - RewritePath=/notifications/(?<segment>.*), /api/notifications/${segment}
 
       default-filters:
         - AddResponseHeader=X-Gateway, FlashCart-Gateway
