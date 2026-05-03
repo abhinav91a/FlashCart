@@ -12,6 +12,37 @@
 
   <h2 class="text-3xl font-bold mb-8 text-center">Flash Sale Products</h2>
 
+  <!-- WebSocket Status -->
+  <div class="mb-4 text-xs text-center"
+       [ngClass]="connected() ? 'text-emerald-400' : 'text-slate-500'">
+    {{ connected() ? '🟢 Live updates connected' : '⚪ Connecting to live updates...' }}
+  </div>
+
+  <!-- Order Success -->
+  <div *ngIf="orderSuccess()"
+       class="mb-4 p-3 bg-emerald-900/30 border border-emerald-500/30 rounded-lg text-emerald-400 text-sm text-center">
+    ✅ {{ orderSuccess() }}
+  </div>
+
+  <!-- Order Error -->
+  <div *ngIf="orderError()"
+       class="mb-4 p-3 bg-red-900/30 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+    ❌ {{ orderError() }}
+  </div>
+
+  <!-- Live Notifications Feed -->
+  <div *ngIf="notifications().length > 0" class="mb-6">
+    <h3 class="text-sm font-semibold text-slate-400 mb-2">🔔 Live Activity</h3>
+    <div class="space-y-1 max-h-32 overflow-y-auto">
+      <div
+        *ngFor="let n of notifications()"
+        class="text-xs bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-slate-300"
+      >
+        {{ n }}
+      </div>
+    </div>
+  </div>
+
   <!-- Loading Skeletons -->
   <div *ngIf="loading()" class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
     <div
@@ -63,7 +94,7 @@
 
       <!-- Product Image -->
       <img
-        [src]="p.imageUrl || 'https://picsum.photos/200/300'"
+        [src]="p.imageUrl || 'https://picsum.photos/seed/' + p.id + '/400/300'"
         alt="{{ p.name }}"
         class="w-full h-40 object-cover rounded-xl mb-4 bg-slate-200 dark:bg-slate-800"
       />
@@ -102,16 +133,22 @@
 
       <!-- Buy Button -->
       <button
+        (click)="buyNow(p.id)"
         class="mt-6 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
                bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-slate-400 dark:disabled:bg-slate-700
                focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2
                focus:ring-offset-white dark:focus:ring-offset-slate-900
                transition-colors duration-200 active:scale-95"
         type="button"
-        [disabled]="p.stock === 0"
-        [attr.aria-disabled]="p.stock === 0"
+        [disabled]="p.stock === 0 || ordering() === p.id"
       >
-        {{ p.stock === 0 ? 'Sold Out' : 'Buy Now' }}
+        @if (ordering() === p.id) {
+          ⏳ Placing...
+        } @else if (p.stock === 0) {
+          Sold Out
+        } @else {
+          Buy Now
+        }
       </button>
 
     </article>
