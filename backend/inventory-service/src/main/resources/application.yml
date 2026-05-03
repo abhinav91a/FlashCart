@@ -6,6 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/inventorydb
     username: inventoryuser
     password: inventorypass
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -16,5 +17,15 @@ spring:
     host: localhost
     port: 6379
 
-kafka:
-  bootstrap-servers: localhost:9092
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: inventory-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.flashcart.common.events.OrderPlacedEvent
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer

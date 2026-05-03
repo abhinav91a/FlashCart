@@ -86,7 +86,7 @@ services:
       SPRING_DATASOURCE_USERNAME: orderuser
       SPRING_DATASOURCE_PASSWORD: orderpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      REDIS_HOST: redis
+      SPRING_DATA_REDIS_HOST: flashcart-redis
     ports:
       - "8082:8082"
     depends_on:
@@ -107,7 +107,7 @@ services:
       SPRING_DATASOURCE_USERNAME: inventoryuser
       SPRING_DATASOURCE_PASSWORD: inventorypass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      REDIS_HOST: redis
+      SPRING_DATA_REDIS_HOST: flashcart-redis
     ports:
       - "8083:8083"
     depends_on:

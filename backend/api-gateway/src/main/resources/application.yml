@@ -4,6 +4,18 @@ server:
 spring:
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
       routes:
         - id: product-service
           uri: http://flashcart-product-service:8081
@@ -16,23 +28,33 @@ spring:
         - id: order-service
           uri: http://flashcart-order-service:8082
           predicates:
-            - Path=/orders/**
+            - Path=/orders,/orders/**
           filters:
             - RewritePath=/orders/(?<segment>.*), /api/orders/${segment}
+            - RewritePath=/orders, /api/orders
 
         - id: inventory-service
           uri: http://flashcart-inventory-service:8083
           predicates:
-            - Path=/inventory/**
+            - Path=/inventory,/inventory/**
           filters:
             - RewritePath=/inventory/(?<segment>.*), /api/inventory/${segment}
+            - RewritePath=/inventory, /api/inventory
 
         - id: notification-service
           uri: http://flashcart-notification-service:8084
           predicates:
-            - Path=/notifications/**
+            - Path=/notifications,/notifications/**
           filters:
             - RewritePath=/notifications/(?<segment>.*), /api/notifications/${segment}
+            - RewritePath=/notifications, /api/notifications
+
+        - id: notification-ws
+          uri: http://flashcart-notification-service:8084
+          predicates:
+            - Path=/ws/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
       default-filters:
         - AddResponseHeader=X-Gateway, FlashCart-Gateway
