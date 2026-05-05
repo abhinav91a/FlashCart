@@ -19,12 +19,26 @@ public class ProductService {
         return repo.findAll();
     }
 
-    public Product create(Product product) {
-        return repo.save(product);
-    }
-
     public Product getById(Long id) {
         return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    public Product create(Product p) {
+        return repo.save(p);
+    }
+
+    public Product update(Long id, Product updated) {
+        Product existing = getById(id);
+        existing.setSku(updated.getSku());
+        existing.setName(updated.getName());
+        existing.setDescription(updated.getDescription());
+        existing.setPriceInCents(updated.getPriceInCents());
+        existing.setStock(updated.getStock());
+        return repo.save(existing);
+    }
+
+    public void delete(Long id) {
+        repo.deleteById(id);
     }
 }

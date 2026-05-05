@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class OrderService {
 
@@ -22,10 +24,8 @@ public class OrderService {
         this.kafka = kafka;
     }
 
-    public Order createOrder(CreateOrderRequest req) {
-
+    public Order createOrder(CreateOrderRequest req, String email) {
         String key = "product:" + req.productId() + ":stock";
-
         Long newStock = redis.opsForValue().decrement(key, req.quantity());
 
         if (newStock == null || newStock < 0) {
@@ -36,22 +36,24 @@ public class OrderService {
         Order order = Order.builder()
                 .productId(req.productId())
                 .quantity(req.quantity())
-                .userId(req.userId())
+                .userId(email)
                 .status(OrderStatus.PENDING)
                 .build();
 
         Order saved = repo.save(order);
 
-        OrderPlacedEvent event = OrderPlacedEvent.builder()
+        kafka.send("order-placed", OrderPlacedEvent.builder()
                 .orderId(saved.getId())
                 .productId(saved.getProductId())
                 .quantity(saved.getQuantity())
-                .userId(saved.getUserId())
-                .build();
-
-        kafka.send("order-placed", event);
+                .userId(email)
+                .build());
 
         saved.setStatus(OrderStatus.CONFIRMED);
         return repo.save(saved);
+    }
+
+    public List<Order> getOrdersByUser(String userId) {
+        return repo.findByUserIdOrderByIdDesc(userId);
     }
 }

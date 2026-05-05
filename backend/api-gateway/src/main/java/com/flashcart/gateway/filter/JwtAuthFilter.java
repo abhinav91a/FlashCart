@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -21,8 +22,16 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private String secret;
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/",
+            "/auth",
+            "/ws"
+    );
+
+    private static final List<String> PUBLIC_GET_PATHS = List.of(
             "/products"
+    );
+
+    private static final List<String> ADMIN_ONLY_PATHS = List.of(
+            "/inventory"
     );
 
     private Key getKey() {
@@ -32,9 +41,16 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        HttpMethod method = exchange.getRequest().getMethod();
 
-        // Allow public routes
-        if (isPublic(path)) {
+        // Allow fully public paths
+        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
+            return chain.filter(exchange);
+        }
+
+        // Allow GET on products publicly
+        if (method == HttpMethod.GET &&
+                PUBLIC_GET_PATHS.stream().anyMatch(path::startsWith)) {
             return chain.filter(exchange);
         }
 
@@ -55,11 +71,33 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            String role = claims.get("role", String.class);
+
+            // Check admin-only paths
+            if (ADMIN_ONLY_PATHS.stream().anyMatch(path::startsWith)) {
+                if (!"ADMIN".equals(role)) {
+                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                    return exchange.getResponse().setComplete();
+                }
+            }
+
+            // Check admin-only methods on products
+            if (PUBLIC_GET_PATHS.stream().anyMatch(path::startsWith)) {
+                if (method == HttpMethod.POST ||
+                        method == HttpMethod.PUT ||
+                        method == HttpMethod.DELETE) {
+                    if (!"ADMIN".equals(role)) {
+                        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                        return exchange.getResponse().setComplete();
+                    }
+                }
+            }
+
             // Add user info to headers for downstream services
             ServerWebExchange mutated = exchange.mutate()
                     .request(r -> r
                             .header("X-User-Email", claims.getSubject())
-                            .header("X-User-Role", claims.get("role", String.class))
+                            .header("X-User-Role", role)
                     )
                     .build();
 
@@ -69,10 +107,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
-    }
-
-    private boolean isPublic(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
 
     @Override
