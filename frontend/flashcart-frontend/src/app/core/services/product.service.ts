@@ -16,6 +16,7 @@ export interface Product {
 export class ProductService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/products`;
+  private readonly flashUrl = `${environment.apiUrl}/products/flash`;
 
   // State managed via Signals
   products = signal<Product[]>([]);
@@ -23,24 +24,17 @@ export class ProductService {
   error = signal<string | null>(null);
 
   loadProducts(): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.http.get<Product[]>(this.baseUrl).subscribe({
-      next: (data) => {
-        console.log('Products received:', data);
-        try {
-          this.products.set(data);
-          this.loading.set(false);
-        } catch (e) {
-          console.error('Error setting products:', e);
-          this.loading.set(false);
-        }
-      },
-      error: (e) => {
-        console.error('HTTP error:', e);
-        this.error.set('Failed to load products. Please try again later.');
-        this.loading.set(false);
-      },
-    });
+  this.loading.set(true);
+  this.error.set(null);
+  this.http.get<Product[]>(this.flashUrl).subscribe({
+    next: (data) => {
+      this.products.set(data);
+      this.loading.set(false);
+    },
+    error: () => {
+      this.error.set('Failed to load products.');
+      this.loading.set(false);
+    }
+  });
   }
 }

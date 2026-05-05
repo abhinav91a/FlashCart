@@ -123,39 +123,30 @@
 
       <!-- Buy Button -->
       <!-- Quantity Selector + Buy Button -->
-      <div class="mt-6 flex gap-2">
-        <div class="flex items-center border border-slate-700 rounded-lg overflow-hidden">
-          <button
-            (click)="decrementQty(p.id)"
-            class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-            [disabled]="getQty(p.id) <= 1"
-          >−</button>
-          <span class="px-4 py-2 bg-slate-800 text-slate-50 min-w-[3rem] text-center">
-            {{ getQty(p.id) }}
-          </span>
-          <button
-            (click)="incrementQty(p.id, p.stock)"
-            class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-            [disabled]="getQty(p.id) >= p.stock"
-          >+</button>
-        </div>
-        <button
-          (click)="buyNow(p.id)"
-          class="flex-1 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
-                bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-slate-700
-                transition-colors duration-200 active:scale-95"
-          type="button"
-          [disabled]="p.stock === 0 || ordering() === p.id"
-        >
-          @if (ordering() === p.id) {
-            ⏳ Placing...
-          } @else if (p.stock === 0) {
-            Sold Out
-          } @else {
-            Buy Now
-          }
-        </button>
-      </div>
+      @if (p.stock > 0) {
+          <div class="mt-6 flex gap-2">
+            <!-- quantity selector -->
+            <div class="flex items-center border border-slate-700 rounded-lg overflow-hidden">
+              <button (click)="decrementQty(p.id)" [disabled]="getQty(p.id) <= 1"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300">−</button>
+              <span class="px-4 py-2 bg-slate-800 text-slate-50 min-w-[3rem] text-center">
+                {{ getQty(p.id) }}
+              </span>
+              <button (click)="incrementQty(p.id, p.stock)" [disabled]="getQty(p.id) >= p.stock"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300">+</button>
+            </div>
+            <button (click)="buyNow(p.id)" [disabled]="ordering() === p.id"
+              class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700
+                    text-white font-semibold rounded-xl px-4 py-2 text-sm transition-colors">
+              {{ ordering() === p.id ? '⏳ Placing...' : 'Buy Now' }}
+            </button>
+          </div>
+        } @else {
+          <button disabled
+            class="mt-6 w-full bg-slate-800 text-slate-500 font-semibold rounded-xl px-4 py-2 text-sm cursor-not-allowed">
+            😔 Sold Out
+          </button>
+        }
 
     </article>
   </div>
