@@ -1,4 +1,3 @@
 package com.flashcart.auth.api;
 
-public class AuthRequest {
-}
+public record AuthRequest(String email, String password) {}

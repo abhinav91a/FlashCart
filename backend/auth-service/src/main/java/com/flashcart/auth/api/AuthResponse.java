@@ -1,4 +1,3 @@
 package com.flashcart.auth.api;
 
-public class AuthResponse {
-}
+public record AuthResponse(String token, String email, String role) {}

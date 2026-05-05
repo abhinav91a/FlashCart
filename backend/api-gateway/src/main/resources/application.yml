@@ -1,6 +1,9 @@
 server:
   port: 8080
 
+jwt:
+  secret: flashcart-super-secret-key-must-be-at-least-32-chars
+
 spring:
   cloud:
     gateway:
@@ -17,6 +20,13 @@ spring:
             allowedHeaders:
               - "*"
       routes:
+        - id: auth-service
+          uri: http://flashcart-auth-service:8085
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /api/auth/${segment}
+
         - id: product-service
           uri: http://flashcart-product-service:8081
           predicates:
