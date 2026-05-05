@@ -10,4 +10,10 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+body {
+  @apply bg-white text-slate-900 transition-colors duration-300;
+}
 
+html.dark body {
+  @apply bg-slate-950 text-white;
+}

@@ -14,6 +14,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private orderService = inject(OrderService);
   private notificationService = inject(NotificationService);
+  quantities = signal<Record<number, number>>({});
 
   readonly products = this.productService.products;
   readonly loading = this.productService.loading;
@@ -41,35 +42,45 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.notificationService.disconnect();
   }
 
-  toggleTheme() {
-    const next = this.theme() === 'dark' ? 'light' : 'dark';
-    this.theme.set(next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
+  getStockWidth(stock: number): number {
+    return Math.min((stock / 100) * 100, 100);
+  }
+
+  getQty(productId: number): number {
+    return this.quantities()[productId] ?? 1;
+  }
+
+  incrementQty(productId: number, maxStock: number) {
+    const current = this.getQty(productId);
+    if (current < maxStock) {
+      this.quantities.update(q => ({ ...q, [productId]: current + 1 }));
+    }
+  }
+
+  decrementQty(productId: number) {
+    const current = this.getQty(productId);
+    if (current > 1) {
+      this.quantities.update(q => ({ ...q, [productId]: current - 1 }));
+    }
   }
 
   buyNow(productId: number) {
+    const quantity = this.getQty(productId);
     this.ordering.set(productId);
     this.orderError.set(null);
     this.orderSuccess.set(null);
 
-    this.orderService.placeOrder({
-      productId,
-      quantity: 1,
-      userId: 'user-001'
-    }).subscribe({
+    this.orderService.placeOrder({ productId, quantity }).subscribe({
       next: (order) => {
         this.orderSuccess.set(`Order #${order.id} placed successfully!`);
         this.ordering.set(null);
-        this.productService.loadProducts();
+        this.quantities.update(q => ({ ...q, [productId]: 1 }));
+        setTimeout(() => this.productService.loadProducts(), 1500);
       },
       error: () => {
         this.orderError.set('Failed to place order. Try again.');
         this.ordering.set(null);
       }
     });
-  }
-
-  getStockWidth(stock: number): number {
-    return Math.min((stock / 100) * 100, 100);
   }
 }
