@@ -37,6 +37,7 @@ public class ProductController {
                 .description(req.description())
                 .priceInCents(req.priceInCents())
                 .stock(req.stock())
+                .flashDeal(req.flashDeal() != null && req.flashDeal())
                 .build();
         return ResponseEntity.ok(toResponse(service.create(p)));
     }
@@ -50,6 +51,7 @@ public class ProductController {
                 .description(req.description())
                 .priceInCents(req.priceInCents())
                 .stock(req.stock())
+                .flashDeal(req.flashDeal() != null && req.flashDeal())
                 .build();
         return ResponseEntity.ok(toResponse(service.update(id, p)));
     }
@@ -60,6 +62,13 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/flash")
+    public List<ProductResponse> flashDeals() {
+        return service.getFlashDeals().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private ProductResponse toResponse(Product p) {
         return new ProductResponse(
                 p.getId(),
@@ -67,7 +76,8 @@ public class ProductController {
                 p.getName(),
                 p.getDescription(),
                 p.getPriceInCents(),
-                p.getStock()
+                p.getStock(),
+                p.getFlashDeal()
         );
     }
 }

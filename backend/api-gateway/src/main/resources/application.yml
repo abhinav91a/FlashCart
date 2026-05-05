@@ -27,6 +27,13 @@ spring:
           filters:
             - RewritePath=/auth(?<segment>/.*|$), /api/auth${segment}
 
+        - id: product-flash
+          uri: http://flashcart-product-service:8081
+          predicates:
+            - Path=/products/flash
+          filters:
+            - RewritePath=/products/flash, /api/products/flash
+
         - id: product-service
           uri: http://flashcart-product-service:8081
           predicates:

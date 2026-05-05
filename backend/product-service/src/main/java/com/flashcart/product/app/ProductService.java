@@ -28,6 +28,10 @@ public class ProductService {
         return repo.save(p);
     }
 
+    public List<Product> getFlashDeals() {
+        return repo.findByFlashDealTrue();
+    }
+
     public Product update(Long id, Product updated) {
         Product existing = getById(id);
         existing.setSku(updated.getSku());
@@ -35,6 +39,7 @@ public class ProductService {
         existing.setDescription(updated.getDescription());
         existing.setPriceInCents(updated.getPriceInCents());
         existing.setStock(updated.getStock());
+        existing.setFlashDeal(updated.getFlashDeal());
         return repo.save(existing);
     }
 
