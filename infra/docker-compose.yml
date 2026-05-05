@@ -51,6 +51,8 @@ services:
     env_file:
       - ./common.env
     container_name: flashcart-api-gateway
+    environment:
+      JWT_SECRET: flashcart-super-secret-key-must-be-at-least-32-chars
     ports:
       - "8080:8080"
     depends_on:
@@ -129,6 +131,22 @@ services:
       - "8084:8084"
     depends_on:
       - kafka
+    networks:
+      - flashcart-net
+
+  auth-service:
+    build: ../backend/auth-service
+    container_name: flashcart-auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: authpass
+      JWT_SECRET: flashcart-super-secret-key-must-be-at-least-32-chars
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
     networks:
       - flashcart-net
 

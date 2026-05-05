@@ -38,8 +38,26 @@ public class ProductController {
                 .priceInCents(req.priceInCents())
                 .stock(req.stock())
                 .build();
-        Product saved = service.create(p);
-        return ResponseEntity.ok(toResponse(saved));
+        return ResponseEntity.ok(toResponse(service.create(p)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id,
+                                                  @RequestBody CreateProductRequest req) {
+        Product p = Product.builder()
+                .sku(req.sku())
+                .name(req.name())
+                .description(req.description())
+                .priceInCents(req.priceInCents())
+                .stock(req.stock())
+                .build();
+        return ResponseEntity.ok(toResponse(service.update(id, p)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     private ProductResponse toResponse(Product p) {
