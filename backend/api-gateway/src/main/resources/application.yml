@@ -7,6 +7,9 @@ jwt:
 spring:
   cloud:
     gateway:
+      actuator:
+        verbose:
+          enabled: true
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -49,8 +52,6 @@ spring:
             - RewritePath=/products(?<segment>/.*|$), /api/products${segment}
 
         - id: order-service
-
-
           uri: http://flashcart-order-service:8082
           predicates:
             - Path=/orders,/orders/**
@@ -77,11 +78,18 @@ spring:
             - Path=/ws/**
           filters:
             - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+
       default-filters:
         - AddResponseHeader=X-Gateway, FlashCart-Gateway
 
 management:
+  server:
+    port: 8090
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,prometheus
+      base-path: /actuator
+  metrics:
+    tags:
+      application: api-gateway
