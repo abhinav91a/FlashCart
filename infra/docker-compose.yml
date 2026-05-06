@@ -46,19 +46,37 @@ services:
     networks:
       - flashcart-net
 
+  prometheus:
+    image: prom/prometheus
+    container_name: flashcart-prometheus
+    networks:
+      - flashcart-net
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: flashcart-grafana
+    networks:
+      - flashcart-net
+    ports:
+      - "3000:3000"
+
   elasticsearch:
-      image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-      container_name: flashcart-elasticsearch
-      environment:
-        - discovery.type=single-node
-        - xpack.security.enabled=false
-        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      ports:
-        - "9200:9200"
-      networks:
-        - flashcart-net
-      volumes:
-        - esdata:/var/lib/elasticsearch/data
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: flashcart-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - flashcart-net
+    volumes:
+      - esdata:/var/lib/elasticsearch/data
 
   api-gateway:
     build: ../backend/api-gateway
@@ -67,8 +85,13 @@ services:
     container_name: flashcart-api-gateway
     environment:
       JWT_SECRET: flashcart-super-secret-key-must-be-at-least-32-chars
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-gateway
+      MANAGEMENT_SERVER_PORT: "8090"
+      MANAGEMENT_SERVER_ADDRESS: "0.0.0.0"
     ports:
       - "8080:8080"
+      - "8090:8090"
     depends_on:
       - product-service
       - order-service
@@ -85,6 +108,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/productdb
       SPRING_DATASOURCE_USERNAME: productuser
       SPRING_DATASOURCE_PASSWORD: productpass
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-product
     ports:
       - "8081:8081"
     depends_on:
@@ -104,6 +129,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: orderpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_DATA_REDIS_HOST: flashcart-redis
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-order
     ports:
       - "8082:8082"
     depends_on:
@@ -125,6 +152,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: inventorypass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_DATA_REDIS_HOST: flashcart-redis
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-inventory
     ports:
       - "8083:8083"
     depends_on:
@@ -142,6 +171,8 @@ services:
     container_name: flashcart-notification-service
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-notification
     ports:
       - "8084:8084"
     depends_on:
@@ -158,6 +189,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: authpass
       JWT_SECRET: flashcart-super-secret-key-must-be-at-least-32-chars
       JWT_EXPIRATION: 86400000
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-auth
     ports:
       - "8085:8085"
     depends_on:
@@ -171,8 +204,10 @@ services:
       - ./common.env
     container_name: flashcart-search-service
     environment:
-      SPRING_ELASTICSEARCH_URIS: http://flashcart-elasticsearch:9200
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,prometheus
+      MANAGEMENT_METRICS_TAGS_APPLICATION: flashcart-search
     ports:
       - "8086:8086"
     depends_on:

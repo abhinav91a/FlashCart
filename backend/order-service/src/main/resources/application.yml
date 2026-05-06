@@ -22,3 +22,12 @@ spring:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, info, prometheus
+    metrics:
+      tags:
+        application: ${spring.application.name}

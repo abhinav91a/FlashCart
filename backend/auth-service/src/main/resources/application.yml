@@ -13,6 +13,15 @@ spring:
       ddl-auto: update
     show-sql: true
 
-jwt:
-  secret: flashcart-super-secret-key-must-be-at-least-32-chars
-  expiration: 86400000
+  jwt:
+    secret: flashcart-super-secret-key-must-be-at-least-32-chars
+    expiration: 86400000
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, info, prometheus
+    metrics:
+      tags:
+        application: ${spring.application.name}

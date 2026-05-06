@@ -14,3 +14,12 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
         spring.json.value.default.type: com.flashcart.common.events.ProductIndexEvent
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health, info, prometheus
+    metrics:
+      tags:
+        application: ${spring.application.name}
