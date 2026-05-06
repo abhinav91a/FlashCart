@@ -1,16 +1,39 @@
 <section class="max-w-7xl mx-auto py-10 px-4">
 
-  <!-- Theme Toggle -->
-  <button
-    (click)="toggleTheme()"
-    class="fixed top-5 right-5 bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-200
-           px-4 py-2 rounded-lg text-sm shadow hover:bg-slate-300 dark:hover:bg-slate-700
-           transition-colors duration-300"
-  >
-    {{ theme() === 'dark' ? '🌞 Light Mode' : '🌙 Dark Mode' }}
-  </button>
-
   <h2 class="text-3xl font-bold mb-8 text-center">Flash Sale Products</h2>
+
+  <!-- Search Bar -->
+<div class="mb-8 max-w-xl mx-auto relative">
+  <div class="relative">
+    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</span>
+    <input
+      type="text"
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      placeholder="Search products..."
+      class="w-full pl-11 pr-10 py-3 rounded-xl
+             bg-slate-900 border border-slate-700
+             text-slate-100 placeholder-slate-500
+             focus:outline-none focus:border-emerald-500
+             transition-colors text-sm"
+    />
+    <button
+      *ngIf="searchQuery()"
+      (click)="clearSearch()"
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+    >✕</button>
+  </div>
+
+  <!-- Search state indicator -->
+  <p *ngIf="isSearching() && products().length === 0"
+     class="text-center text-slate-500 text-sm mt-4">
+    No results for "{{ searchQuery() }}"
+  </p>
+  <p *ngIf="isSearching() && products().length > 0"
+     class="text-slate-500 text-xs mt-2 text-center">
+    {{ products().length }} result{{ products().length !== 1 ? 's' : '' }} for "{{ searchQuery() }}"
+  </p>
+</div>
 
   <!-- WebSocket Status -->
   <div class="mb-4 text-xs text-center"
@@ -80,7 +103,8 @@
     >
 
       <!-- Flash Deal Ribbon -->
-      <div class="absolute -top-2 -left-2 bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-br-xl">
+       <div *ngIf="p.flashDeal"
+        class="absolute -top-2 -left-2 bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-br-xl">
         ⚡ Flash Deal
       </div>
 
@@ -132,24 +156,31 @@
       </div>
 
       <!-- Buy Button -->
-      <button
-        (click)="buyNow(p.id)"
-        class="mt-6 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold
-               bg-emerald-500 text-white hover:bg-emerald-400 disabled:bg-slate-400 dark:disabled:bg-slate-700
-               focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2
-               focus:ring-offset-white dark:focus:ring-offset-slate-900
-               transition-colors duration-200 active:scale-95"
-        type="button"
-        [disabled]="p.stock === 0 || ordering() === p.id"
-      >
-        @if (ordering() === p.id) {
-          ⏳ Placing...
-        } @else if (p.stock === 0) {
-          Sold Out
+      <!-- Quantity Selector + Buy Button -->
+      @if (p.stock > 0) {
+          <div class="mt-6 flex gap-2">
+            <!-- quantity selector -->
+            <div class="flex items-center border border-slate-700 rounded-lg overflow-hidden">
+              <button (click)="decrementQty(p.id)" [disabled]="getQty(p.id) <= 1"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300">−</button>
+              <span class="px-4 py-2 bg-slate-800 text-slate-50 min-w-[3rem] text-center">
+                {{ getQty(p.id) }}
+              </span>
+              <button (click)="incrementQty(p.id, p.stock)" [disabled]="getQty(p.id) >= p.stock"
+                class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300">+</button>
+            </div>
+            <button (click)="buyNow(p.id)" [disabled]="ordering() === p.id"
+              class="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700
+                    text-white font-semibold rounded-xl px-4 py-2 text-sm transition-colors">
+              {{ ordering() === p.id ? '⏳ Placing...' : 'Buy Now' }}
+            </button>
+          </div>
         } @else {
-          Buy Now
+          <button disabled
+            class="mt-6 w-full bg-slate-800 text-slate-500 font-semibold rounded-xl px-4 py-2 text-sm cursor-not-allowed">
+            😔 Sold Out
+          </button>
         }
-      </button>
 
     </article>
   </div>

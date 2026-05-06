@@ -1,1 +1,38 @@
-<p>orders works!</p>
+<div class="max-w-5xl mx-auto py-10 px-4 transition-colors duration-300 text-slate-900 dark:text-white">
+  <h2 class="text-3xl font-bold mb-8 text-inherit">My Orders</h2>
+
+  <div *ngIf="loading()" class="text-slate-500 dark:text-slate-400 animate-pulse text-center py-12">
+    Loading orders...
+  </div>
+
+  <div *ngIf="error()" class="text-red-500 dark:text-red-400 text-center py-12">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="!loading() && orders().length === 0" class="text-slate-400 text-center py-12">
+    No orders yet. Go grab a flash deal!
+  </div>
+
+  <div *ngIf="!loading() && orders().length > 0" class="space-y-4">
+    <div
+      *ngFor="let o of orders()"
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex items-center justify-between shadow-sm"
+    >
+      <div>
+        <p class="font-semibold text-lg text-slate-900 dark:text-slate-50">Order #{{ o.id }}</p>
+        <p class="text-slate-500 dark:text-slate-400 text-sm">Product ID: {{ o.productId }} · Qty: {{ o.quantity }}</p>
+      </div>
+
+      <!-- Status Badge with Light Mode support -->
+      <span
+        class="px-3 py-1 rounded-full text-xs font-bold"
+        [ngClass]="{
+          'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400': o.status === 'CONFIRMED',
+          'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400': o.status === 'PENDING'
+        }"
+      >
+        {{ o.status }}
+      </span>
+    </div>
+  </div>
+</div>

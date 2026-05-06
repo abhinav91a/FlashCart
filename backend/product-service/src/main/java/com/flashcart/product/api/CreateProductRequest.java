@@ -5,5 +5,6 @@ public record CreateProductRequest(
         String name,
         String description,
         Long priceInCents,
-        Integer stock
+        Integer stock,
+        Boolean flashDeal
 ) {}

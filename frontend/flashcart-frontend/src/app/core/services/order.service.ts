@@ -21,7 +21,7 @@ export class OrderService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/orders`;
 
-  placeOrder(req: CreateOrderRequest) {
+  placeOrder(req: { productId: number; quantity: number }) {
     return this.http.post<OrderResponse>(this.baseUrl, req);
   }
 }

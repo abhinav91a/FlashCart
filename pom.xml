@@ -28,6 +28,7 @@
         <module>backend/notification-service</module>
         <module>backend/api-gateway</module>
         <module>backend/auth-service</module>
+        <module>backend/search-service</module>
     </modules>
 
     <properties>

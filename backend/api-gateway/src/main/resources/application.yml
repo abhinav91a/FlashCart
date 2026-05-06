@@ -27,6 +27,20 @@ spring:
           filters:
             - RewritePath=/auth(?<segment>/.*|$), /api/auth${segment}
 
+        - id: search-service
+          uri: http://flashcart-search-service:8086
+          predicates:
+            - Path=/search/**
+          filters:
+            - RewritePath=/search(?<segment>/.*|$), /api/search${segment}
+
+        - id: product-flash
+          uri: http://flashcart-product-service:8081
+          predicates:
+            - Path=/products/flash
+          filters:
+            - RewritePath=/products/flash, /api/products/flash
+
         - id: product-service
           uri: http://flashcart-product-service:8081
           predicates:
@@ -35,6 +49,8 @@ spring:
             - RewritePath=/products(?<segment>/.*|$), /api/products${segment}
 
         - id: order-service
+
+
           uri: http://flashcart-order-service:8082
           predicates:
             - Path=/orders,/orders/**
