@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { NgIf, NgForOf } from '@angular/common';
+import { NgIf, NgForOf, NgClass } from '@angular/common';
 import { environment } from '../../../../environment/environment';
 
 interface Product {
@@ -11,12 +11,13 @@ interface Product {
   description: string;
   priceInCents: number;
   stock: number;
+  flashDeal: boolean;
 }
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [FormsModule, NgIf, NgForOf],
+  imports: [FormsModule, NgIf, NgForOf, NgClass],
   templateUrl: './admin.component.html'
 })
 export class AdminComponent implements OnInit {
@@ -29,7 +30,7 @@ export class AdminComponent implements OnInit {
 
   newProduct = {
     sku: '', name: '', description: '',
-    priceInCents: 0, stock: 0
+    priceInCents: 0, stock: 0, flashDeal: false
   };
 
   ngOnInit() {
@@ -49,13 +50,14 @@ export class AdminComponent implements OnInit {
     this.http.post<Product>(`${environment.apiUrl}/products`, this.newProduct).subscribe({
       next: () => {
         this.success.set('Product created successfully!');
-        this.newProduct = { sku: '', name: '', description: '', priceInCents: 0, stock: 0 };
+        this.newProduct = { sku: '', name: '', description: '', priceInCents: 0, stock: 0, flashDeal: false };
         this.loadProducts();
         setTimeout(() => this.success.set(null), 3000);
       },
       error: () => this.error.set('Failed to create product.')
     });
   }
+
 
   deleteProduct(id: number) {
     if (!confirm('Delete this product?')) return;
@@ -73,4 +75,16 @@ export class AdminComponent implements OnInit {
       next: () => this.success.set('Inventory seeded!')
     });
   }
+
+  toggleFlashDeal(p: Product) {
+  const updated = { ...p, flashDeal: !p.flashDeal };
+  this.http.put<Product>(`${environment.apiUrl}/products/${p.id}`, updated).subscribe({
+    next: (result) => {
+      this.success.set(`${result.name} is now ${result.flashDeal ? '⚡ a Flash Deal' : 'a Normal product'}`);
+      this.loadProducts();
+      setTimeout(() => this.success.set(null), 3000);
+    },
+    error: () => this.error.set('Failed to update product.')
+  });
+}
 }

@@ -1,24 +1,37 @@
-<main class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-300">
+<main class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50">
   <section class="max-w-6xl mx-auto py-10 px-4">
-    <!-- Flash Sale Header -->
     <header class="mb-10 text-center">
       <h1 class="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
         ⚡ Flash Sale
       </h1>
-      <p class="text-slate-400 mt-3 text-lg">
+      <p class="text-slate-500 dark:text-slate-400 mt-3 text-lg">
         Limited stock. Real-time updates. No second chances.
       </p>
-      <div
-        class="mt-6 text-4xl font-mono bg-white dark:bg-slate-900 inline-block px-8 py-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner"
-        role="timer"
-        aria-live="polite"
-      >
+      <div class="mt-6 text-4xl font-mono bg-white dark:bg-slate-900 inline-block px-8 py-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
         {{ countdown() }}
       </div>
     </header>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-8 justify-center">
+      <button
+        (click)="switchTab('flash')"
+        class="px-6 py-2 rounded-full text-sm font-semibold transition-colors"
+        [ngClass]="activeTab() === 'flash' ?
+          'bg-emerald-500 text-white' :
+          'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'">
+        ⚡ Flash Deals
+      </button>
+      <button
+        (click)="switchTab('all')"
+        class="px-6 py-2 rounded-full text-sm font-semibold transition-colors"
+        [ngClass]="activeTab() === 'all' ?
+          'bg-emerald-500 text-white' :
+          'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700'">
+        🛒 All Products
+      </button>
+    </div>
   </section>
 
-  <!-- Product list handles its own loading/error/data states -->
   <app-product-list></app-product-list>
 </main>
-

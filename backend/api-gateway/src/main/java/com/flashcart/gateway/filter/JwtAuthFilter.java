@@ -27,7 +27,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     );
 
     private static final List<String> PUBLIC_GET_PATHS = List.of(
-            "/products"
+            "/products",
+            "/search"
     );
 
     private static final List<String> ADMIN_ONLY_PATHS = List.of(

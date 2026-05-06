@@ -9,6 +9,7 @@ export interface Product {
   description: string;
   priceInCents: number;
   stock: number;
+  flashDeal: boolean;
   imageUrl?: string;
 }
 
@@ -23,18 +24,22 @@ export class ProductService {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  loadProducts(): void {
-  this.loading.set(true);
-  this.error.set(null);
-  this.http.get<Product[]>(this.flashUrl).subscribe({
-    next: (data) => {
-      this.products.set(data);
-      this.loading.set(false);
-    },
-    error: () => {
-      this.error.set('Failed to load products.');
-      this.loading.set(false);
-    }
-  });
+  loadProducts(filter: 'flash' | 'all' = 'flash'): void {
+    this.loading.set(true);
+    this.error.set(null);
+    const url = filter === 'flash'
+      ? `${environment.apiUrl}/products/flash`
+      : `${environment.apiUrl}/products`;
+
+    this.http.get<Product[]>(url).subscribe({
+      next: (data) => {
+        this.products.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to load products.');
+        this.loading.set(false);
+      }
+    });
   }
 }

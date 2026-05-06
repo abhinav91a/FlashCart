@@ -1,6 +1,7 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductListComponent } from '../features/product-list/product-list.component';
+import { ProductService } from '../core/services/product.service';
 
 @Component({
   selector: 'app-flash-sale',
@@ -9,32 +10,30 @@ import { ProductListComponent } from '../features/product-list/product-list.comp
   templateUrl: './flash-sale.component.html',
 })
 export class FlashSaleComponent implements OnInit {
+  private productService = inject(ProductService);
 
-  countdown = signal('00:00:00');
+  countdown = signal('00:00');
+  activeTab = signal<'flash' | 'all'>('flash');
 
   ngOnInit(): void {
     this.startCountdown();
+    this.productService.loadProducts(this.activeTab());
+  }
+
+  switchTab(tab: 'flash' | 'all') {
+    this.activeTab.set(tab);
+    this.productService.loadProducts(tab);
   }
 
   private startCountdown() {
     const saleEnd = new Date();
-    saleEnd.setMinutes(saleEnd.getMinutes() + 10); // 10 min sale
-
+    saleEnd.setMinutes(saleEnd.getMinutes() + 10);
     setInterval(() => {
-      const now = new Date().getTime();
-      const diff = saleEnd.getTime() - now;
-
-      if (diff <= 0) {
-        this.countdown.set('SALE ENDED');
-        return;
-      }
-
-      const minutes = Math.floor((diff / 1000 / 60) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-
-      this.countdown.set(
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-      );
+      const diff = saleEnd.getTime() - new Date().getTime();
+      if (diff <= 0) { this.countdown.set('SALE ENDED'); return; }
+      const m = Math.floor(diff / 1000 / 60 % 60);
+      const s = Math.floor(diff / 1000 % 60);
+      this.countdown.set(`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
     }, 1000);
   }
 }
